@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include "../stack/func.cpp"
 
-void ReadAsm(FILE * asmcode, stack_type* stk);
+void ReadAsm(FILE * asmcode, stack_type* stk, int registers[], int ram[]);
 int FileSize(FILE* fp);
+int GetArgs(int code[], int registers[], int ram[], int* ip);
+
 
 #define CHECK_ERR(condition, message_error, err_code) \
                 do{                                    \
@@ -13,6 +15,11 @@ int FileSize(FILE* fp);
                             return err_code;              \
                         }                                  \
                 } while(0)
+
+const int ARG_IMMED          = 1 << 5;
+const int ARG_REG            = 1 << 6;
+const int ARG_RAM            = 1 << 7;
+const int AMOUNT_OF_REGISTERS = 20;
 
 enum 
 {
@@ -25,7 +32,7 @@ enum
     CMD_OUT  = 7,
     CMD_IN   = 8,
     CMD_HLT  = 9,
-
+    CMD_JMP  = 10,
     
     ERR_OPEN_FILE, 
     ERR_FSTAT,
@@ -36,43 +43,61 @@ int main()
 {
 
     FILE * asmcode = NULL;
-    
+    printf("kl");
+    int registers[AMOUNT_OF_REGISTERS] = {1, 2};
+    int ram[10] = {};
     stack_type stack = {};
     stackCreator_(&stack, 5);
-    ReadAsm(asmcode, &stack);
+    ReadAsm(asmcode, &stack, registers, ram);
     return 0;
 }
 
 //==============================================================================
 
-void ReadAsm(FILE * asmcode, stack_type* stk)
+void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
 {
     int* err = {};
     elem_t pop_value1 = POISON;
     elem_t pop_value2 = POISON;
     elem_t pop_value  = POISON;
     asmcode = fopen("out.bin", "rb");
+    if (asmcode == NULL)
+    {
+        printf("nild");
+    }
     int size_buf = FileSize(asmcode);
-    int code [size_buf / sizeof(int)];
-    
-    fread(code, sizeof(int), size_buf, asmcode);
-    for (int i = 0; i < size_buf / sizeof(int); i++)
+    int code [size_buf/sizeof(int) + 1];
+    printf("any");
+    int res = fread(code, sizeof(int), size_buf, asmcode);
+    printf("%d", res);
+    fclose(asmcode);
+
+    //printf("%d", res);
+    for (int i = 0; i < (size_buf / sizeof(int)); i++)
     {
         printf("%d\n", code[i]);
+        printf("lolll");
+        printf("i %d\n", i);
     }
-    
+    printf("how");
+
     int ip = 0;
+    int val = 0;
+    int cmd = 0;
    // printf("%ld\n", size_buf / sizeof(int));
     while(ip !=  ((size_buf / sizeof(int)) ))
     {
         // printf("%d\n", ip);
         // printf("In stack %d\n", stk->data[stk->size - 1]);
+        printf("ip%d", ip);
 
-        switch (code[ip])
+        switch (code[ip] & 0xF)
         {
         case CMD_PUSH:
-            stackPush(stk, &code[ip + 1]);
-            // printf("code : %d\n", stk->data[stk->size - 1]);
+           // printf("ip");
+            val = GetArgs(code, regs, ram, &ip);
+            stackPush(stk, &val);
+            //printf("code : %d\n", stk->data[stk->size - 1]);
             ip += 2;
             break;
         case CMD_ADD:
@@ -87,11 +112,24 @@ void ReadAsm(FILE * asmcode, stack_type* stk)
             stackPush(stk, &pop_value);
             ip += 1;
             break;
+        case CMD_DIV:
+            ip++;
+            break;
+        case CMD_HLT:
+            ip++;
+            break;
+        case CMD_JMP:
+            ip++;
+            printf("ipiii%d", ip);
+            ip = code[ip];
+            printf("look%d", ip);
+            break;
         default:
             break;
         }
     }
     //printf("%d\n", stk -> data[0]);
+    printf("stack");
 }
 
 //=================================================================================
@@ -103,4 +141,24 @@ int FileSize(FILE* fp)
     CHECK_ERR(res_fstat == -1, "can't fill the structure stat", ERR_FSTAT);
     int size_buf = buffer.st_size;
     return size_buf;
+}
+
+int GetArgs(int code[], int regs[], int ram[], int* ip)
+{
+    int cmd = code[(*(ip))++];
+    int arg = 0;
+    //printf("lol");
+    if (cmd & ARG_IMMED)
+    {
+        arg = code[(*(ip))++];
+    }
+    if (cmd & ARG_REG)
+    {
+        arg = regs[code[(*(ip))++]];
+    }
+    if (cmd & ARG_RAM)
+    {
+        arg = ram[arg];
+    }
+    return arg;
 }

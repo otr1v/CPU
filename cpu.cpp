@@ -16,10 +16,11 @@ int GetArgs(int code[], int registers[], int ram[], int* ip);
                         }                                  \
                 } while(0)
 
-const int ARG_IMMED          = 1 << 5;
-const int ARG_REG            = 1 << 6;
-const int ARG_RAM            = 1 << 7;
+const int ARG_IMMED           = 1 << 5;
+const int ARG_REG             = 1 << 6;
+const int ARG_RAM             = 1 << 7;
 const int AMOUNT_OF_REGISTERS = 20;
+const int CMD_MASK            = 0xF;
 
 enum 
 {
@@ -45,7 +46,7 @@ int main()
     FILE * asmcode = NULL;
     printf("kl");
     int registers[AMOUNT_OF_REGISTERS] = {1, 2};
-    int ram[10] = {};
+    int ram[10] = {1, 2, 3, 4, 5, 6};
     stack_type stack = {};
     stackCreator_(&stack, 5);
     ReadAsm(asmcode, &stack, registers, ram);
@@ -79,7 +80,7 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
         printf("lolll");
         printf("i %d\n", i);
     }
-    printf("how");
+    //printf("how");
 
     int ip = 0;
     int val = 0;
@@ -89,16 +90,17 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
     {
         // printf("%d\n", ip);
         // printf("In stack %d\n", stk->data[stk->size - 1]);
-        printf("ip%d", ip);
+        //printf("ip%d", ip);
 
-        switch (code[ip] & 0xF)
+        switch (code[ip] & CMD_MASK)
         {
         case CMD_PUSH:
            // printf("ip");
             val = GetArgs(code, regs, ram, &ip);
+            printf("push value is %d\n", val);
             stackPush(stk, &val);
             //printf("code : %d\n", stk->data[stk->size - 1]);
-            ip += 2;
+            //ip += 2;
             break;
         case CMD_ADD:
             // printf("In stack %d\n", stk->data[stk->size]);

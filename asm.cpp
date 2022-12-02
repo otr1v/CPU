@@ -124,7 +124,7 @@ int* ReadFile(int code[], int labels[], int registers[], int ram[])
         exit(EXIT_FAILURE);
     }
     int num_of_commands = n_strings;
-    printf("num%d", num_of_commands);
+   // printf("num%d", num_of_commands);
     ClearArray(code);
 
     ReadCommands(code, num_of_commands, text, labels, registers, ram);
@@ -252,17 +252,38 @@ int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_
     int command = 0;
     int val = 0;
     char reg[6] = {};
+
+    int counter = 0; // check if command is ram/reg or immed
+
     if (strcmp("push", cmd) == 0)
     {
         char ch1 = ' ', ch2 =' ';
 
         command = CMD_PUSH;
+        printf("return value is %d\n", sscanf(text[current_line] + read_symbols, "%c %d %c", &ch1, &val, &ch2));
+        printf("%c %c\n", ch1, ch2);
         if (sscanf(text[current_line] + read_symbols, "%d", &val) == 1)
         {
             // printf("value %d", val);
             command |= MASK_IMMED;
+            counter++;
         }
-        else if (sscanf(text[current_line] + read_symbols, "%s", reg) == 1)
+        else if ((sscanf(text[current_line] + read_symbols, "%c", &ch1) == 1))
+        {
+            char* ptr = text[current_line] + read_symbols + 1;
+            while (ch1 == ' ')
+            {
+                sscanf(ptr, "%c", &ch1);
+                ptr++;
+            }
+            if ((ch1 == '[') && (sscanf(ptr, "%d %c", &val, &ch1) == 2))
+            {
+                command |= MASK_RAM;
+                command |= MASK_IMMED;
+                counter++;
+            }
+        }
+        if ((sscanf(text[current_line] + read_symbols, "%s", reg) == 1) && (counter == 0))
         {
             command |= MASK_REGISTER;
             // printf("%s\n", reg);
@@ -284,18 +305,15 @@ int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_
             }
             else
             {
-                printf("syntax error\n");
+                printf("lolsyntax error\n");
             }
-            
+
+            counter++;
         }
-        else if ((sscanf(text[current_line] + read_symbols, "%c%d%c", &ch1, &val, &ch2) == 3) && (ch1 == '[')&& (ch2 ==']'))
+        
+        if (counter == 0)
         {
-            command |= MASK_RAM;
-            command |= MASK_IMMED;
-        }
-        else
-        {
-            printf("syntax error");
+            printf("syntax error : there wasn't these type of command\n\n");
         }
         printf("command :%d\n", command);
         code[(*(ip))++] = command;

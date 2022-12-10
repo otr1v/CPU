@@ -51,6 +51,10 @@ enum
     CMD_IN   = 8,
     CMD_HLT  = 9,
     CMD_JMP  = 10,
+    CMD_SQRT = 11,
+    CMD_POW2 = 12,
+    CMD_CPY  = 13,
+    CMD_JA   = 14,
     NO_MEMORY,
     ERR_OPEN_FILE, 
     ERR_FSTAT,
@@ -91,12 +95,12 @@ int main()
 
 int* ReadFile(int code[], int labels[])
 {
-    FILE* fp = fopen("input.txt", "r");
-    int size_buf = FileSize(fp);
+    FILE* input = fopen("factorial.txt", "r");
+    int size_buf = FileSize(input);
     char* buf = (char *) calloc(size_buf + 1, sizeof(char));
-    fread(buf, sizeof(char), size_buf, fp);
-
-    int n_strings = CounterStrings(fp, size_buf, buf);
+    fread(buf, sizeof(char), size_buf, input);
+    fclose(input);
+    int n_strings = CounterStrings(input, size_buf, buf);
     
     char** text = (char **) calloc(n_strings + 1, sizeof(char*));
 
@@ -198,7 +202,7 @@ int* ReadCommands(int code[], int num_of_commands, char** text, int labels[])
             // printf("what\n");
             printf("label %d\n", labels[label]);
         }
-        if (strcmp("jump", cmd) == 0)
+        if (strcmp("jmp", cmd) == 0)
         {
             //printf("read symb%d\n", read_symbols);
             code[ip++] = CMD_JMP;
@@ -220,6 +224,23 @@ int* ReadCommands(int code[], int num_of_commands, char** text, int labels[])
                 //printf("question");
             };
         }
+        if (strcmp(cmd, "ja") == 0)
+        {
+            code[ip++] = CMD_JA;
+            int spaces = 0;
+            while (sscanf(text[current_line] + read_symbols + spaces, "%c", &ch) == 1 && (isspace(ch) > 0))
+            {
+                spaces++;
+            }
+            if (sscanf(text[current_line] + read_symbols + spaces, "%c%d", &ch, &label) == 2) 
+            {
+                if (labels[label] != 0)
+                {
+                    code[ip++] = labels[label] + 1;
+                }
+            };
+
+        }
         else if (strcmp("div", cmd) == 0)
         {
             code[ip++] = CMD_DIV;
@@ -233,7 +254,27 @@ int* ReadCommands(int code[], int num_of_commands, char** text, int labels[])
         {
             ReadArgs(code, text, cmd, read_symbols, current_line, &ip);
         }
-        
+        else if (strcmp(cmd, "mul") == 0)
+        {
+            code[ip++] = CMD_MUL;
+        }
+        else if (strcmp(cmd, "sqrt") == 0)
+        {
+            code[ip++] == CMD_SQRT;
+        }
+        else if (strcmp(cmd, "sub") == 0)
+        {
+            code[ip++] = CMD_SUB;
+        }
+        else if (strcmp(cmd, "pow2") == 0)
+        {
+            code[ip++] = CMD_POW2;
+        }
+        else if (strcmp(cmd, "cpy") == 0)
+        {
+            code[ip++] = CMD_CPY;
+        }
+       
         if (ip > 100)
         {
             return code;

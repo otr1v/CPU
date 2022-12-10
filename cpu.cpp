@@ -58,8 +58,6 @@ int main()
 void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
 {
     int* err = {};
-    elem_t pop_value1 = POISON;
-    elem_t pop_value2 = POISON;
     elem_t pop_value  = POISON;
     asmcode = fopen("out.bin", "rb");
     if (asmcode == NULL)
@@ -67,7 +65,7 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
         printf("nild");
     }
     int size_buf = FileSize(asmcode);
-    int code [size_buf/sizeof(int) + 1];
+    int* code = (int *) calloc((size_buf / sizeof(int)) + 1, sizeof(int));
     printf("any");
     int res = fread(code, sizeof(int), size_buf, asmcode);
     printf("%d", res);
@@ -104,12 +102,12 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
             break;
         case CMD_ADD:
             // printf("In stack %d\n", stk->data[stk->size]);
-            stackPop(stk, err, &pop_value1);
+            //stackPop(stk, err, &pop_value1);
             // printf("In stack %d\n", stk->data[stk->size]);
-            stackPop(stk, err, &pop_value2);
+            //stackPop(stk, err, &pop_value2);
             // printf("pop value1 = %d\n", pop_value1);
             // printf("pop value2 = %d\n", pop_value2);
-            pop_value = pop_value1 + pop_value2;
+            pop_value = stackPop(stk, err) + stackPop(stk, err);
             //printf("pop value = %d\n", pop_value);
             stackPush(stk, &pop_value);
             ip += 1;
@@ -117,6 +115,11 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
         case CMD_DIV:
             ip++;
             break;
+        case CMD_POP:
+            ip++;
+            pop_value = stackPop(stk, err);
+            printf("code[ip++]%d\n", code[ip]);
+            regs[code[ip++]] = pop_value;
         case CMD_HLT:
             ip++;
             break;
@@ -130,8 +133,12 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
             break;
         }
     }
-    //printf("%d\n", stk -> data[0]);
-    printf("stack");
+    for (int i = 0; i < 5; i++)
+    {
+        printf("%d.%d\n", i, stk->data[i]);
+        printf("regs %d\n", regs[i]);
+    }
+    //printf("stack");
 }
 
 //=================================================================================
@@ -144,6 +151,8 @@ int FileSize(FILE* fp)
     int size_buf = buffer.st_size;
     return size_buf;
 }
+
+//=====================================================================================
 
 int GetArgs(int code[], int regs[], int ram[], int* ip)
 {

@@ -34,7 +34,10 @@ enum
     CMD_IN   = 8,
     CMD_HLT  = 9,
     CMD_JMP  = 10,
-    
+    CMD_SQRT = 11,
+    CMD_POW2 = 12,
+    CMD_CPY  = 13,
+    CMD_JA   = 14,
     ERR_OPEN_FILE, 
     ERR_FSTAT,
     BAD_FREAD
@@ -58,7 +61,8 @@ int main()
 void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
 {
     int* err = {};
-    elem_t pop_value  = POISON;
+    elem_t pop_value     = POISON;
+    elem_t cmd_pop_value = POISON;
     asmcode = fopen("out.bin", "rb");
     if (asmcode == NULL)
     {
@@ -110,16 +114,17 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
             pop_value = stackPop(stk, err) + stackPop(stk, err);
             //printf("pop value = %d\n", pop_value);
             stackPush(stk, &pop_value);
-            ip += 1;
+            ip++;
             break;
         case CMD_DIV:
             ip++;
             break;
         case CMD_POP:
             ip++;
-            pop_value = stackPop(stk, err);
-            printf("code[ip++]%d\n", code[ip]);
-            regs[code[ip++]] = pop_value;
+            cmd_pop_value = stackPop(stk, err);
+            printf("code[ip]%d\n", code[ip]);
+            regs[code[ip++]] = cmd_pop_value;
+            break;
         case CMD_HLT:
             ip++;
             break;
@@ -129,11 +134,47 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
             ip = code[ip];
             printf("look%d", ip);
             break;
+        case CMD_SQRT:
+            pop_value = stackPop(stk, err);
+            if (pop_value < 0)
+            {
+                printf("sqrt of number that < 0");
+            }
+            else 
+            {
+
+            }
+            ip++;
+            break;
+        case CMD_CPY:
+            pop_value = stackPop(stk, err);
+            stackPush(stk, &pop_value);
+            stackPush(stk, &pop_value);
+            ip++;
+            break;
+        case CMD_MUL:
+            pop_value = (stackPop(stk, err)) * (stackPop(stk, err));
+            printf("whatlol");
+            stackPush(stk, &pop_value);
+            printf("%d\n", stk->data[stk->size - 1]);
+            ip++;
+            break;
+        case CMD_JA:
+            if (stk->data[stk->size - 1] > 10)
+            {
+                ip += 2;
+            }
+            else
+            {
+                ip++;
+                ip = code[ip];
+            }
+            break;
         default:
             break;
         }
     }
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 7; i++)
     {
         printf("%d.%d\n", i, stk->data[i]);
         printf("regs %d\n", regs[i]);
@@ -171,5 +212,6 @@ int GetArgs(int code[], int regs[], int ram[], int* ip)
     {
         arg = ram[arg];
     }
+    printf("arg%d\n", arg);
     return arg;
 }

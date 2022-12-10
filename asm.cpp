@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define CHECK_ERR(condition, message_error, err_code) \
                 do{                                    \
@@ -26,7 +27,7 @@
 
 ;
 
-const int MAX_LABEL_SIZE      = 20;
+const int MAX_LABEL_SIZE      = 300;
 const int MAX_COMMANDS        = 100;
 const int AMOUNT_OF_REGISTERS = 20;
 const int REG_RAX             = 0;
@@ -37,6 +38,7 @@ const int MASK_IMMED          = 1 << 5;
 const int MASK_REGISTER       = 1 << 6;
 const int MASK_RAM            = 1 << 7;
 const int AMOUNT_OF_RAM       = 15;
+
 enum 
 {
     CMD_PUSH = 1,
@@ -55,30 +57,30 @@ enum
     BAD_FREAD
 };
 
-int* ReadFile(int code[], int labels[], int registers[], int ram[]);
+int* ReadFile(int code[], int labels[]);
 int FileSize(FILE* fp);
 int CounterStrings(FILE* fp, int size_buf, char* buf);
-int* ReadCommands(int code[], int num_of_commands, char** text, int labels[], int registers[], int ram[]);
+int* ReadCommands(int code[], int num_of_commands, char** text, int labels[]);
 void ClearArray(int code[]);
-int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_line, int* ip, int registers[], int ram[]);
+int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_line, int* ip);
 
 
 int main()
 {
     int code[MAX_COMMANDS] ={};
     int labels[MAX_LABEL_SIZE] = {};
-    int registers[AMOUNT_OF_REGISTERS] = {1, 2};
-    int ram[AMOUNT_OF_RAM] = {5, 4, 3, 2, 1};
+    // int registers[AMOUNT_OF_REGISTERS] = {1, 2};
+    // int ram[AMOUNT_OF_RAM] = {5, 4, 3, 2, 1};
     // FILE* fp = fopen("out.bin", "wb");
     // fwrite(code, sizeof(int), 100, fp);
     
-    ReadFile(code, labels, registers, ram);
+    ReadFile(code, labels);
     for (int i = 0; i < 15; i++)
     {
         printf("label %d\n", labels[i]);
     }
-    ReadFile(code, labels, registers, ram);
-    for (int i = 0; i < 15; i++)
+    ReadFile(code, labels);
+    for (int i = 0; i < 10; i++)
     {
         printf("label %d\n", labels[i]);
     }
@@ -87,7 +89,7 @@ int main()
 
 //================================================================
 
-int* ReadFile(int code[], int labels[], int registers[], int ram[])
+int* ReadFile(int code[], int labels[])
 {
     FILE* fp = fopen("input.txt", "r");
     int size_buf = FileSize(fp);
@@ -127,7 +129,7 @@ int* ReadFile(int code[], int labels[], int registers[], int ram[])
    // printf("num%d", num_of_commands);
     ClearArray(code);
 
-    ReadCommands(code, num_of_commands, text, labels, registers, ram);
+    ReadCommands(code, num_of_commands, text, labels);
     
     return code;
 }
@@ -160,26 +162,27 @@ int CounterStrings(FILE* fp, int size_buf, char* buf)
 
 //=======================================================================
 
-int* ReadCommands(int code[], int num_of_commands, char** text, int labels[], int registers[], int ram[])
+int* ReadCommands(int code[], int num_of_commands, char** text, int labels[])
 {
     FILE* out = fopen("out.bin", "wb");
 
     int current_line = 1;
     int ip = 0;
-    while (current_line != (num_of_commands))
+    printf("num : %d", num_of_commands);
+    while (current_line != (num_of_commands + 1))
     {
         char cmd[5] = "";
         int read_symbols = 0;
         sscanf(text[current_line], "%s%n", cmd, &read_symbols);
         if (strcmp("push", cmd) == 0)
         {
-            int val = ReadArgs(code, text, cmd, read_symbols, current_line, &ip, registers, ram);
+            int val = ReadArgs(code, text, cmd, read_symbols, current_line, &ip);
             printf("value = %d\n", val);
             // sscanf(text[current_line] + read_symbols, "%d", &val);
             // code[ip++]   = CMD_PUSH;
             // code[ip++] = val;
         }
-        if (strcmp("add", cmd) == 0)
+        else if (strcmp("add", cmd) == 0)
         {
             code[ip++] = CMD_ADD;
         }
@@ -187,18 +190,25 @@ int* ReadCommands(int code[], int num_of_commands, char** text, int labels[], in
         char ch;
         if (sscanf(text[current_line], "%d%c", &label, &ch) == 2)
         {
+            printf("labeeel%d%c\n\n", label, ch);
             if (ch == ':')
             {
                 labels[label] = ip;
             }
             // printf("what\n");
-            // printf("label %d\n", labels[label]);
+            printf("label %d\n", labels[label]);
         }
         if (strcmp("jump", cmd) == 0)
         {
             //printf("read symb%d\n", read_symbols);
             code[ip++] = CMD_JMP;
-            if (sscanf(text[current_line] + read_symbols + 1, "%c%d", &ch, &label) == 2)
+            
+            int spaces = 0;
+            while (sscanf(text[current_line] + read_symbols + spaces, "%c", &ch) == 1 && (isspace(ch) > 0))
+            {
+                spaces++;
+            }
+            if (sscanf(text[current_line] + read_symbols + spaces, "%c%d", &ch, &label) == 2) 
             {
                 //printf("read label %d", label);
                 if (labels[label] != 0)
@@ -210,15 +220,20 @@ int* ReadCommands(int code[], int num_of_commands, char** text, int labels[], in
                 //printf("question");
             };
         }
-        if (strcmp("div", cmd) == 0)
+        else if (strcmp("div", cmd) == 0)
         {
             code[ip++] = CMD_DIV;
         }
-        if (strcmp("hlt", cmd) == 0)
+        else if (strcmp("hlt", cmd) == 0)
         {
             code[ip++] = CMD_HLT;
-            printf("%d\n", ip);
+            printf("nooooooo%d\n", ip);
         }
+        else if (strcmp("pop", cmd) == 0)
+        {
+            ReadArgs(code, text, cmd, read_symbols, current_line, &ip);
+        }
+        
         if (ip > 100)
         {
             return code;
@@ -227,7 +242,7 @@ int* ReadCommands(int code[], int num_of_commands, char** text, int labels[], in
     }
     for (int i = 0; i < 30; i++)
     {
-        printf("code :%d\n", code[i]);
+        printf("%d code :%d\n", i, code[i]);
     }
     printf("ipiaad%d", ip);
     fwrite(code, sizeof(int), ip, out);
@@ -247,7 +262,7 @@ void ClearArray(int code[])
 
 //==================================================================================
 
-int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_line, int* ip, int registers[], int ram[])
+int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_line, int* ip)
 {
     int command = 0;
     int val = 0;
@@ -320,18 +335,40 @@ int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_
         printf("ip :%d\n", *ip);
         code[(*(ip))++] = val;
     }
-    if (strcmp(cmd, "pop") == 0)
+    else if (strcmp(cmd, "pop") == 0)
     {
         command = CMD_POP;
-        if (sscanf(text[current_line] + read_symbols, "%d", &val) == 1)
-        {
-            command |= MASK_IMMED;
-        }
-        else if (sscanf(text[current_line] + read_symbols, "%s", reg) == 1)
-        {
-            command |= MASK_REGISTER;
-        }
+        command |= MASK_REGISTER;
         code[(*(ip))++] = command;
+        if (sscanf(text[current_line] + read_symbols, "%s", reg) == 1)
+        {
+            if (strcmp(reg, "rax") == 0)
+            {
+                val = REG_RAX;
+            }
+            else if (strcmp(reg, "rbx") == 0)
+            {
+                val = REG_RBX;
+            }
+            else if (strcmp(reg, "rcx") == 0)
+            {
+                val = REG_RCX;
+            }
+            else if (strcmp(reg, "rdx") == 0)
+            {
+                val = REG_RDX;
+            }
+            else
+            {
+                printf("lolsyntax error\n");
+            }
+        }
+        else
+        {
+            printf("syntax error");
+        }
+        code[(*(ip))++] = val;
+
     }
     return val;
 }

@@ -2,11 +2,12 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include "../stack/func.cpp"
+#include <math.h>
 
 void ReadAsm(FILE * asmcode, stack_type* stk, int registers[], int ram[]);
 int FileSize(FILE* fp);
 int GetArgs(int code[], int registers[], int ram[], int* ip);
-
+int MySqrt(int a);
 
 #define CHECK_ERR(condition, message_error, err_code) \
                 do{                                    \
@@ -21,7 +22,12 @@ const int ARG_REG             = 1 << 6;
 const int ARG_RAM             = 1 << 7;
 const int AMOUNT_OF_REGISTERS = 20;
 const int CMD_MASK            = 0xF;
-
+const int REG_RAX             = 0;
+const int REG_RBX             = 1;
+const int REG_RCX             = 2;
+const int REG_RDX             = 3;
+const int REG_REX             = 4;
+const int REG_RFX             = 5;
 enum 
 {
     CMD_PUSH = 1,
@@ -37,7 +43,8 @@ enum
     CMD_SQRT = 11,
     CMD_POW2 = 12,
     CMD_CPY  = 13,
-    CMD_JA   = 14,
+    CMD_JB   = 14,
+    CMD_JE  = 15,
     ERR_OPEN_FILE, 
     ERR_FSTAT,
     BAD_FREAD
@@ -47,7 +54,6 @@ int main()
 {
 
     FILE * asmcode = NULL;
-    printf("kl");
     int registers[AMOUNT_OF_REGISTERS] = {1, 2};
     int ram[10] = {1, 2, 3, 4, 5, 6};
     stack_type stack = {};
@@ -70,23 +76,22 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
     }
     int size_buf = FileSize(asmcode);
     int* code = (int *) calloc((size_buf / sizeof(int)) + 1, sizeof(int));
-    printf("any");
     int res = fread(code, sizeof(int), size_buf, asmcode);
-    printf("%d", res);
     fclose(asmcode);
-
+    FILE* dump = fopen("dump.txt", "w");
     //printf("%d", res);
     for (int i = 0; i < (size_buf / sizeof(int)); i++)
     {
         printf("%d\n", code[i]);
-        printf("lolll");
-        printf("i %d\n", i);
+        //printf("lolll");
+        //printf("i %d\n", i);
     }
     //printf("how");
 
     int ip = 0;
     int val = 0;
     int cmd = 0;
+    int first_pop = 0, second_pop = 0, sub_result = 0, div_result = 0, sqrt_result = 0;
    // printf("%ld\n", size_buf / sizeof(int));
     while(ip !=  ((size_buf / sizeof(int)) ))
     {
@@ -114,9 +119,23 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
             pop_value = stackPop(stk, err) + stackPop(stk, err);
             //printf("pop value = %d\n", pop_value);
             stackPush(stk, &pop_value);
+            printf( "addval %d\n", stk->data[stk->size - 1]);
+
             ip++;
             break;
         case CMD_DIV:
+            if (stk->data[stk->size - 1] != 0)
+            {
+                first_pop = stackPop(stk, err);
+                second_pop = stackPop(stk, err);
+                div_result = (int)(second_pop / first_pop);
+                stackPush(stk, &div_result);
+            }
+            else
+            {
+                printf("attempt to divide by 0\n");
+            }
+            printf("divvvv %d", div_result);
             ip++;
             break;
         case CMD_POP:
@@ -124,9 +143,18 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
             cmd_pop_value = stackPop(stk, err);
             printf("code[ip]%d\n", code[ip]);
             regs[code[ip++]] = cmd_pop_value;
+            printf("reg %d", regs[3]);
             break;
         case CMD_HLT:
-            ip++;
+            if (regs[REG_REX] == 0)
+            {
+                printf("no roots\n");
+            }
+            else
+            {
+                printf("the first root %d\n the second root %d\n", regs[REG_REX], regs[REG_RFX]);
+            }
+            exit(1);
             break;
         case CMD_JMP:
             ip++;
@@ -142,7 +170,9 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
             }
             else 
             {
-
+                //sqrt_result = MySqrt(pop_value);
+                sqrt_result = (int)(pop_value / 2);
+                stackPush(stk, &sqrt_result);
             }
             ip++;
             break;
@@ -150,25 +180,47 @@ void ReadAsm(FILE * asmcode, stack_type* stk, int regs[], int ram[])
             pop_value = stackPop(stk, err);
             stackPush(stk, &pop_value);
             stackPush(stk, &pop_value);
+            printf("CPY ARG%d and %d\n", stk->data[stk->size - 1], stk->data[stk->size - 2]);
             ip++;
             break;
         case CMD_MUL:
             pop_value = (stackPop(stk, err)) * (stackPop(stk, err));
             printf("whatlol");
             stackPush(stk, &pop_value);
-            printf("%d\n", stk->data[stk->size - 1]);
+            printf("mulval %d\n", stk->data[stk->size - 1]);
+            printf("rex %d\n", regs[REG_REX]);
             ip++;
             break;
-        case CMD_JA:
-            if (stk->data[stk->size - 1] > 10)
+        case CMD_JB:
+            if (regs[REG_RDX] > 0)
             {
-                ip += 2;
+                ip++;
+                ip = code[ip] + 1;
+                printf("ipp %d", ip);
             }
             else
             {
-                ip++;
-                ip = code[ip];
+                ip += 2;
             }
+            break;
+        case CMD_JE:
+            if (regs[REG_RDX] == 0)
+                {
+                    ip++;
+                    ip = code[ip] - 1;
+                }
+            else
+            {
+                ip += 2;
+            }
+            break;
+        case CMD_SUB:
+            first_pop = stackPop(stk, err);
+            second_pop = stackPop(stk, err);
+            sub_result = second_pop - first_pop;
+            stackPush(stk, &sub_result);
+            printf("sub res %d\n", sub_result);
+            ip++;
             break;
         default:
             break;
@@ -214,4 +266,14 @@ int GetArgs(int code[], int regs[], int ram[], int* ip)
     }
     printf("arg%d\n", arg);
     return arg;
+}
+
+//========================================================================
+
+int MySqrt(int a)
+{
+    double num = (double) a;
+    double res =  sqrt(1);
+    int result = (int) res;
+    return result;
 }

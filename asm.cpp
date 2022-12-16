@@ -28,12 +28,14 @@
 ;
 
 const int MAX_LABEL_SIZE      = 300;
-const int MAX_COMMANDS        = 100;
+const int MAX_COMMANDS        = 1000;
 const int AMOUNT_OF_REGISTERS = 20;
 const int REG_RAX             = 0;
 const int REG_RBX             = 1;
 const int REG_RCX             = 2;
 const int REG_RDX             = 3;
+const int REG_REX             = 4;
+const int REG_RFX             = 5;
 const int MASK_IMMED          = 1 << 5;
 const int MASK_REGISTER       = 1 << 6;
 const int MASK_RAM            = 1 << 7;
@@ -54,7 +56,8 @@ enum
     CMD_SQRT = 11,
     CMD_POW2 = 12,
     CMD_CPY  = 13,
-    CMD_JA   = 14,
+    CMD_JB   = 14,
+    CMD_JE  = 15,
     NO_MEMORY,
     ERR_OPEN_FILE, 
     ERR_FSTAT,
@@ -95,7 +98,7 @@ int main()
 
 int* ReadFile(int code[], int labels[])
 {
-    FILE* input = fopen("factorial.txt", "r");
+    FILE* input = fopen("quadratic_eq.txt", "r");
     int size_buf = FileSize(input);
     char* buf = (char *) calloc(size_buf + 1, sizeof(char));
     fread(buf, sizeof(char), size_buf, input);
@@ -224,9 +227,16 @@ int* ReadCommands(int code[], int num_of_commands, char** text, int labels[])
                 //printf("question");
             };
         }
-        if (strcmp(cmd, "ja") == 0)
+        if ((strcmp(cmd, "jb") == 0) || (strcmp(cmd, "je") == 0))
         {
-            code[ip++] = CMD_JA;
+            if ((strcmp(cmd, "jb") == 0))
+            {
+                code[ip++] = CMD_JB;
+            }
+            else
+            {
+                code[ip++] = CMD_JE;
+            }
             int spaces = 0;
             while (sscanf(text[current_line] + read_symbols + spaces, "%c", &ch) == 1 && (isspace(ch) > 0))
             {
@@ -359,6 +369,14 @@ int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_
             {
                 val = REG_RDX;
             }
+            else if (strcmp(reg, "rex") == 0)
+            {
+                val = REG_REX;
+            }
+            else if (strcmp(reg, "rfx") == 0)
+            {
+                val = REG_RFX;
+            }
             else
             {
                 printf("lolsyntax error\n");
@@ -398,6 +416,14 @@ int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_
             else if (strcmp(reg, "rdx") == 0)
             {
                 val = REG_RDX;
+            }
+            else if (strcmp(reg, "rex") == 0)
+            {
+                val = REG_REX;
+            }
+            else if (strcmp(reg, "rfx") == 0)
+            {
+                val = REG_RFX;
             }
             else
             {

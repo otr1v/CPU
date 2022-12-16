@@ -1,0 +1,55 @@
+ASM 2
+push 1
+pop rax
+push -4
+pop rbx
+push -18
+pop rcx
+push rbx
+push rbx
+mul
+push 4
+push rax
+push rcx
+mul
+mul
+sub
+pop rdx
+je :3
+jb :4
+hlt
+3:
+push -1
+push rbx
+mul
+push 2
+push rax
+mul
+div
+pop rex
+hlt
+4:
+push rdx
+sqrt
+pop rdx
+push -1
+push rbx
+mul
+push rdx
+add
+push 2
+push rax
+mul
+div
+pop rex
+push -1
+push rbx
+mul
+push rdx
+sub
+push 2
+push rax
+mul
+div
+pop rfx
+hlt

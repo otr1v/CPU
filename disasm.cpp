@@ -25,6 +25,10 @@ enum
     CMD_IN   = 8,
     CMD_HLT  = 9,
     CMD_JMP  = 10,
+    CMD_SQRT = 11,
+    CMD_CPY  = 12,
+    CMD_JB   = 13,
+    CMD_JE  = 14,
     NO_MEMORY,
     ERR_OPEN_FILE, 
     ERR_FSTAT,
@@ -39,10 +43,12 @@ const int REG_RAX             = 0;
 const int REG_RBX             = 1;
 const int REG_RCX             = 2;
 const int REG_RDX             = 3;
+const int REG_REX             = 4;
+const int REG_RFX             = 5;
+
 
 int main()
 {
-    printf("w");
     ReadBinary();
 
     return 0;
@@ -103,6 +109,16 @@ void ReadBinary()
                     fprintf(out, "rdx\n");
                     counter++;
                 }
+                else if (code[counter] == REG_REX)
+                {
+                    fprintf(out, "rex\n");
+                    counter++;
+                }
+                else if (code[counter] == REG_RFX)
+                {
+                    fprintf(out, "rfx\n");
+                    counter++;
+                }
                 else
                 {
                     counter++;
@@ -126,17 +142,100 @@ void ReadBinary()
             fprintf(out, "hlt\n");
             counter++;
         }
-        else if((code[counter] & CMD_MASK) == CMD_JMP)
+        else if((code[counter] & CMD_MASK) == CMD_JE)
         {
-            fprintf(out, "jmp :");
+            fprintf(out, "je :");
             counter++;
             int label = code[counter++];
             fprintf(out, "%d\n", label);
+        }
+        else if((code[counter] & CMD_MASK) == CMD_JB)
+        {
+            fprintf(out, "jb :");
+            counter++;
+            int label = code[counter++];
+            fprintf(out, "%d\n", label);
+        }
+        else if ((code[counter] & CMD_MASK) == CMD_SQRT)
+        {
+            fprintf(out, "sqrt\n");
+            counter++;
+        }
+        else if ((code[counter] & CMD_MASK) == CMD_CPY)
+        {
+            fprintf(out, "cpy\n");
+            counter++;
+        }
+        else if ((code[counter] & CMD_MASK) == CMD_MUL)
+        {
+            fprintf(out, "mul\n");
+            counter++;
+        }
+        else if ((code[counter] & CMD_MASK) == CMD_DIV)
+        {
+            fprintf(out, "div\n");
+            counter++;
+        }
+        else if ((code[counter] & CMD_MASK) == CMD_SUB)
+        {
+            fprintf(out, "sub\n");
+            counter++;
+        }
+        else if ((code[counter] & CMD_MASK) == CMD_POP)
+        {
+            fprintf(out, "pop ");
+            if ((code[counter] &  ARG_REG) == ARG_REG)
+            {
+                counter++;
+
+                if (code[counter] == REG_RAX)
+                {
+                    fprintf(out, "rax\n");
+                    counter++;
+                    
+                }
+                else if (code[counter] == REG_RBX)
+                {
+                    fprintf(out, "rbx\n");
+                    counter++;
+                }
+                else if (code[counter] == REG_RCX)
+                {
+                    fprintf(out, "rcx\n");
+                    counter++;
+                }
+                else if (code[counter] == REG_RDX)
+                {
+                    fprintf(out, "rdx\n");
+                    counter++;
+                }
+                else if (code[counter] == REG_REX)
+                {
+                    fprintf(out, "rex\n");
+                    counter++;
+                }
+                else if (code[counter] == REG_RFX)
+                {
+                    fprintf(out, "rfx\n");
+                    counter++;
+                }
+                else
+                {
+                    counter++;
+                    printf("схуяли");
+                }
+            }
+            else
+            {
+                counter++;
+                printf("блять");
+            }
         }
         else
         {
             counter++;
             printf("\n");
+            printf("%d\n", counter);
         }
     }
     fclose(out);

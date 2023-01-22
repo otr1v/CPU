@@ -1,3 +1,4 @@
+#pragma once
 #include <stdio.h>
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -36,11 +37,12 @@ const int REG_RCX             = 2;
 const int REG_RDX             = 3;
 const int REG_REX             = 4;
 const int REG_RFX             = 5;
-const int MASK_IMMED          = 1 << 5;
-const int MASK_REGISTER       = 1 << 6;
-const int MASK_RAM            = 1 << 7;
+const int MASK_IMMED          = 1 << 6;
+const int MASK_REGISTER       = 1 << 7;
+const int MASK_RAM            = 1 << 8;
 const int AMOUNT_OF_RAM       = 15;
-
+const int MAX_NAME_REG_SIZE   = 6;
+const int MAX_SIZE_OF_COMMAND = 10;
 enum 
 {
     CMD_PUSH = 1,
@@ -57,16 +59,17 @@ enum
     CMD_CPY  = 12,
     CMD_JB   = 13,
     CMD_JE   = 14,
+    CMD_CALL = 15,
+    CMD_FACT = 16,
     NO_MEMORY,
     ERR_OPEN_FILE, 
-    ERR_FSTAT,
     BAD_FREAD
 };
 
 int* ReadFile(int code[], int labels[]);
-int FileSize(FILE* fp);
 int CounterStrings(FILE* fp, int size_buf, char* buf);
-int* ReadCommands(int code[], int num_of_commands, char** text, int labels[]);
+int* WriteCommands(int code[], int num_of_commands, char** text, int labels[]);
 void ClearArray(int code[]);
 int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_line, int* ip);
+
 

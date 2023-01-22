@@ -1,6 +1,7 @@
 #include "asm.h"
+#include "asmfunc.h"
 
-int main()
+int main(int argc, char* argv[])
 {
     int code[MAX_COMMANDS] ={};
     int labels[MAX_LABEL_SIZE] = {};
@@ -16,5 +17,3 @@ int main()
     }
     return 0;
 }
-
-//================================================================

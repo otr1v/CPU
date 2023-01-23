@@ -3,17 +3,30 @@
 
 int main(int argc, char* argv[])
 {
-    int code[MAX_COMMANDS] ={};
-    int labels[MAX_LABEL_SIZE] = {};
-    ReadFile(code, labels);
-    for (int i = 0; i < 15; i++)
+    ASM asmus = {};
+    // int code[MAX_COMMANDS] ={};
+    // int labels[MAX_LABEL_SIZE] = {};
+    CreateAsm(&asmus);
+    if (argc > 1)
     {
-        printf("label %d\n", labels[i]);
+        ReadFile(&asmus, argv[1]);
+        for (int i = 0; i < 15; i++)
+        {
+            printf("label %d\n", asmus.labels[i]);
+        }
+        ReadFile(&asmus, argv[1]);
+        for (int i = 0; i < 10; i++)
+        {
+            printf("label %d\n", asmus.labels[i]);
+        }
     }
-    ReadFile(code, labels);
-    for (int i = 0; i < 10; i++)
+    else
     {
-        printf("label %d\n", labels[i]);
+        printf("add file name in command line");
+        return 0;
     }
+    
     return 0;
 }
+
+//================================================================

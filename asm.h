@@ -66,10 +66,19 @@ enum
     BAD_FREAD
 };
 
-int* ReadFile(int code[], int labels[]);
-int CounterStrings(FILE* fp, int size_buf, char* buf);
-int* WriteCommands(int code[], int num_of_commands, char** text, int labels[]);
-void ClearArray(int code[]);
-int ReadArgs(int code[], char** text, char cmd[], int read_symbols, int current_line, int* ip);
+typedef struct 
+{
+    int labels[MAX_LABEL_SIZE];
+    int code[MAX_COMMANDS];
+    char** text;
+    int read_symbols;
+    int current_line;
+}ASM;
 
+void CreateAsm(ASM* asmstruct);
+int* ReadFile(ASM* asmstruct, char* filename);
+int CounterStrings(int size_buf, char* buf);
+int* WriteCommands(ASM* asmstruct, int num_of_commands);
+void ClearArray(int code[]);
+int ReadArgs(ASM* asmstruct, char cmd[], int* ip);
 

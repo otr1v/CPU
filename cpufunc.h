@@ -1,10 +1,21 @@
 #include "cpu.h"
 #include "filesize.cpp"
-
-void CreateRegisters(CPU* cpu)
+#define QUADRO_EQ
+void CreateCpu(CPU* cpu)
 {
-    ;
+    for (int i = 0; i < AMOUNT_OF_REGISTERS; i++)
+    {
+        cpu->registers[i] = 0;      // some expressions to fill by your own
+    }                                   // all about RAM and registers
+    for (int j = 0; j < NUMBER_OF_RAM_ELEMS; j++)
+    {
+        cpu->ram[j] = j + 1;        // filling elements of ram and registers are random
+    }
+    cpu->code = NULL;
+    cpu->stack = {};
 }
+
+//==========================================================
 
 int ReadAsm(FILE * asmcode, CPU* cpu)
 {
@@ -17,7 +28,6 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
     cpu->code = (int *) calloc((size_buf / sizeof(int)) + 1, sizeof(int));
     int res = fread(cpu->code, sizeof(int), size_buf, asmcode);
     fclose(asmcode);
-    FILE* dump = fopen("dump.txt", "w");
     //printf("%d", res);
     for (int i = 0; i < (size_buf / sizeof(int)); i++)
     {
@@ -26,10 +36,9 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
         //printf("i %d\n", i);
     }
     //printf("how");
-
+    int counter = 0, insidecounter = 0;
     int ip = 0;
     int val = 0;
-    int cmd = 0;
     int first_pop = 0, second_pop = 0, sub_result = 0, div_result = 0, sqrt_result = 0;
    // printf("%ld\n", size_buf / sizeof(int));
     while(ip !=  ((size_buf / sizeof(int)) ))
@@ -91,14 +100,16 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
             printf("reg %d", cpu->registers[3]);
             break;
         case CMD_HLT:
-            if (cpu->registers[REG_REX] == 0)
-            {
-                printf("no roots\n");
-            }
-            else
-            {
-                printf("the first root %d\n the second root %d\n", cpu->registers[REG_REX], cpu->registers[REG_RFX]);
-            }
+            #ifdef QUADRO_EQ
+                if (cpu->registers[REG_REX] == 0)
+                {
+                    printf("no roots\n");
+                }
+                else
+                {
+                    printf("the first root %d\n the second root %d\n", cpu->registers[REG_REX], cpu->registers[REG_RFX]);
+                }
+            #endif
             return 0;
             break;
         case CMD_JMP:
@@ -151,15 +162,59 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
             }
             break;
         case CMD_JE:
-            if (cpu->registers[REG_RDX] == 0)
+            #ifdef QUADRO_EQ
+                ip++;
+                // if (cpu->registers[REG_RAX] == 0)
+                // {
+                //     ip = cpu->code[ip] - 1;
+                // }
+                if (counter == 1)
                 {
-                    ip++;
-                    ip = cpu->code[ip] - 1;
+                    if (cpu->registers[REG_RDX] == 0)
+                        {
+                            
+                            ip = cpu->code[ip] - 1;
+                        }
+                    else
+                    {
+                        ip++;
+                    }
+                    counter++;
                 }
-            else
-            {
-                ip += 2;
-            }
+                else if (counter == 0)
+                {
+                    if ((cpu->registers[REG_RAX] == 0) && 
+                        (cpu->registers[REG_RBX] == 0) &&
+                        (cpu->registers[REG_RCX] == 0))
+                        {
+                            printf("infinity roots");
+                            ip = cpu->code[ip] - 1;
+                            insidecounter++;
+                        }
+                    else if((cpu->registers[REG_RAX] == 0) && 
+                        (cpu->registers[REG_RBX] == 0) &&
+                        (cpu->registers[REG_RCX] != 0))
+                        {
+                            printf("no roots");
+                        }
+                    else if((cpu->registers[REG_RAX] == 0) && 
+                        (cpu->registers[REG_RBX] != 0) &&
+                        (cpu->registers[REG_RCX] != 0))
+                        {
+                            ip = cpu->code[ip] - 1;
+                        }
+                    else if ((cpu->registers[REG_RAX] != 0) && (insidecounter == 0))
+                    {
+                        ip++;
+                        counter++;
+                    }
+                    else
+                    {
+
+                    }
+                    
+                }
+            #endif
             break;
         case CMD_SUB:
             first_pop = stackPop(&cpu->stack, err);
@@ -178,6 +233,7 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
         printf("%d.%d\n", i, cpu->stack.data[i]);
         printf("cpu->registers %d\n", cpu->registers[i]);
     }
+    free(cpu->code);
     return 0;
     //printf("stack");
 }

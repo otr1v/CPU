@@ -1,5 +1,5 @@
 # This is my first big project named CPU
-## It can read some command (full list of commands in enum) - assembler, and then CPU does this commands using stack
+## It can read some command (full list of commands in  cmd.h) - assembler, and then CPU does this commands using stack
 ## It can count factorial and solve quadratic equation(only with integer solves)
 ### MAX_LABEL_SIZE = 300 - max number that can have your label
 ### MAX_COMMANDS = 1000 - max size of array code

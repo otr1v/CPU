@@ -1,0 +1,6 @@
+CompRegs(RAX)
+CompRegs(RBX)
+CompRegs(RCX)
+CompRegs(RDX)
+CompRegs(REX)
+CompRegs(RFX)

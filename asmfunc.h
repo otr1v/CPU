@@ -1,5 +1,6 @@
 #include "asm.h"
 #include "filesize.cpp"
+
 void CreateAsm(ASM* asmstruct)
 {
     asmstruct->read_symbols = 0;
@@ -41,7 +42,7 @@ int* ReadFile(ASM* asmstruct, char* filename)
         }
     }
 
-    char sign[5] = "";
+    char sign[5] = ""; // the sign of my file is ASM, so array for the sign should be more then three
     int version  = 0, symb_read = 0, read = 0;
 
     sscanf(asmstruct->text[0], "%s%n", sign, &symb_read);
@@ -87,117 +88,83 @@ int* WriteCommands(ASM* asmstruct, int num_of_commands)
     printf("num : %d", num_of_commands);
     while (asmstruct->current_line != (num_of_commands + 1))
     {
+
         char cmd[MAX_SIZE_OF_COMMAND] = "";
         asmstruct->read_symbols = 0;
         sscanf(asmstruct->text[asmstruct->current_line], "%s%n", cmd, &(asmstruct->read_symbols));
-        if (strcmp("push", cmd) == 0)
-        {
-            int val = ReadArgs(asmstruct, cmd, &ip);
-            printf("value = %d\n", val);
-            // sscanf(text[current_line] + read_symbols, "%d", &val);
-            // code[ip++]   = CMD_PUSH;
-            // code[ip++] = val;
-        }
-        else if (strcmp("add", cmd) == 0)
-        {
-            asmstruct->code[ip++] = CMD_ADD;
-        }
-        int label = 0;
-        char ch;
-        if (sscanf(asmstruct->text[asmstruct->current_line], "%d%c", &label, &ch) == 2)
-        {
-            printf("labeeel%d%c\n\n", label, ch);
-            if (ch == ':')
-            {
-                asmstruct->labels[label] = ip;
-            }
-            // printf("what\n");
-            printf("label %d\n", asmstruct->labels[label]);
-        }
-        if (strcmp("jmp", cmd) == 0)
-        {
-            //printf("read symb%d\n", read_symbols);
-            asmstruct->code[ip++] = CMD_JMP;
+        #define DEF_CMD(name, num, arg, ...)        \
+        if (strcasecmp(cmd, #name) == 0)             \
+        {                                             \
+            asmstruct->code[ip] = num;                 \
+            if (arg)                                    \
+                ReadArgs(asmstruct, cmd, &ip);           \
+            ip++;                                         \
+        }                                                  \
+        else
+
+        #include "cmd.h"
+
+        #undef DEF_CMD
+       
+        // int label = 0;
+        // char ch;
+        // if (sscanf(asmstruct->text[asmstruct->current_line], "%d%c", &label, &ch) == 2)
+        // {
+        //     printf("labeeel%d%c\n\n", label, ch);
+        //     if (ch == ':')
+        //     {
+        //         asmstruct->labels[label] = ip;
+        //     }
+        //     // printf("what\n");
+        //     printf("label %d\n", asmstruct->labels[label]);
+        // }
+        // if (strcmp("jmp", cmd) == 0)
+        // {
+        //     //printf("read symb%d\n", read_symbols);
+        //     asmstruct->code[ip++] = CMD_JMP;
             
-            int spaces = 0;
-            while (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + spaces, "%c", &ch) == 1 && (isspace(ch) > 0))
-            {
-                spaces++;
-            }
-            if (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + spaces, "%c%d", &ch, &label) == 2) 
-            {
-                //printf("read label %d", label);
-                if (asmstruct->labels[label] != 0)
-                {
-                    asmstruct->code[ip++] = asmstruct->labels[label] + 1;
-                   // printf("current line %d\n", current_line);
+        //     int spaces = 0;
+        //     while (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + spaces, "%c", &ch) == 1 && (isspace(ch) > 0))
+        //     {
+        //         spaces++;
+        //     }
+        //     if (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + spaces, "%c%d", &ch, &label) == 2) 
+        //     {
+        //         //printf("read label %d", label);
+        //         if (asmstruct->labels[label] != 0)
+        //         {
+        //             asmstruct->code[ip++] = asmstruct->labels[label] + 1;
+        //            // printf("current line %d\n", current_line);
 
-                }
-                //printf("question");
-            };
-        }
-        if ((strcmp(cmd, "jb") == 0) || (strcmp(cmd, "je") == 0))
-        {
-            if ((strcmp(cmd, "jb") == 0))
-            {
-                asmstruct->code[ip++] = CMD_JB;
-            }
-            else
-            {
-                asmstruct->code[ip++] = CMD_JE;
-            }
-            int spaces = 0;
-            while (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + spaces, "%c", &ch) == 1 && (isspace(ch) > 0))
-            {
-                spaces++;
-            }
-            if (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + spaces, "%c%d", &ch, &label) == 2) 
-            {
-                if (asmstruct->labels[label] != 0)
-                {
-                    asmstruct->code[ip++] = asmstruct->labels[label] + 1;
-                }
-            };
+        //         }
+        //         //printf("question");
+        //     };
+        // }
+        // if ((strcmp(cmd, "jb") == 0) || (strcmp(cmd, "je") == 0))
+        // {
+        //     if ((strcmp(cmd, "jb") == 0))
+        //     {
+        //         asmstruct->code[ip++] = CMD_JB;
+        //     }
+        //     else
+        //     {
+        //         asmstruct->code[ip++] = CMD_JE;
+        //     }
+        //     int spaces = 0;
+        //     while (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + spaces, "%c", &ch) == 1 && (isspace(ch) > 0))
+        //     {
+        //         spaces++;
+        //     }
+        //     if (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + spaces, "%c%d", &ch, &label) == 2) 
+        //     {
+        //         if (asmstruct->labels[label] != 0)
+        //         {
+        //             asmstruct->code[ip++] = asmstruct->labels[label] + 1;
+        //         }
+        //     };
 
-        }
-        if (strcmp(cmd, "factorial") == 0)
-        {
-
-        }
-        
-        else if (strcmp("div", cmd) == 0)
-        {
-            asmstruct->code[ip++] = CMD_DIV;
-        }
-        else if (strcmp("hlt", cmd) == 0)
-        {
-            asmstruct->code[ip++] = CMD_HLT;
-            printf("nooooooo%d\n", ip);
-        }
-        else if (strcmp("pop", cmd) == 0)
-        {
-            ReadArgs(asmstruct, cmd, &ip);
-        }
-        else if (strcmp(cmd, "mul") == 0)
-        {
-            asmstruct->code[ip++] = CMD_MUL;
-        }
-        else if (strcmp(cmd, "sqrt") == 0)
-        {
-            asmstruct->code[ip++] = CMD_SQRT;
-        }
-        else if (strcmp(cmd, "sub") == 0)
-        {
-            asmstruct->code[ip++] = CMD_SUB;
-        }
-        else if (strcmp(cmd, "cpy") == 0)
-        {
-            asmstruct->code[ip++] = CMD_CPY;
-        }
-        else if (strcmp(cmd, "call") == 0)
-        {
-            asmstruct->code[ip++] = CMD_CALL;
-        }
+        // }
+     
         if (ip > 100)
         {
             return asmstruct->code;
@@ -233,13 +200,14 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
     char reg[6] = {};
 
     int counter = 0; // check if command is ram/reg or immed
-
-    if (strcmp("push", cmd) == 0)
+    
+    if (strcasecmp("push", cmd) == 0)
     {
         char ch1 = ' ', ch2 =' ';
+        char* ptr = asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + 1;
 
         command = CMD_PUSH;
-        printf("return value is %d\n", sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols, "%c %d %c", &ch1, &val, &ch2));
+        //printf("return value is %d\n", sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols, "%c %d %c", &ch1, &val, &ch2));
         printf("%c %c\n", ch1, ch2);
         if (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols, "%d", &val) == 1)
         {
@@ -249,7 +217,6 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
         }
         else if ((sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols, "%c", &ch1) == 1))
         {
-            char* ptr = asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + 1;
             while (ch1 == ' ')
             {
                 sscanf(ptr, "%c", &ch1);
@@ -260,41 +227,28 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
                 command |= MASK_RAM;
                 command |= MASK_IMMED;
                 counter++;
+                //printf("\n\n\n%d", val);
             }
+           
         }
         if ((sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols, "%s", reg) == 1) && (counter == 0))
         {
             command |= MASK_REGISTER;
+            // printf("where is it");
             // printf("%s\n", reg);
-            if (strcmp(reg, "rax") == 0)
+            
+            #define CompRegs(register)                   \
+                if (strcasecmp(reg, #register) == 0)       \
+                    {                                      \
+                        val = REG_##register;               \
+                    }                                        \
+                else
+            #include "comparison_regs.h"
+            /*else*/
             {
-                val = REG_RAX;
+                printf("Syntax Error, no such register added");
             }
-            else if (strcmp(reg, "rbx") == 0)
-            {
-                val = REG_RBX;
-            }
-            else if (strcmp(reg, "rcx") == 0)
-            {
-                val = REG_RCX;
-            }
-            else if (strcmp(reg, "rdx") == 0)
-            {
-                val = REG_RDX;
-            }
-            else if (strcmp(reg, "rex") == 0)
-            {
-                val = REG_REX;
-            }
-            else if (strcmp(reg, "rfx") == 0)
-            {
-                val = REG_RFX;
-            }
-            else
-            {
-                printf("lolsyntax error\n");
-            }
-
+            
             counter++;
         }
         
@@ -305,49 +259,28 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
         printf("command :%d\n", command);
         asmstruct->code[(*(ip))++] = command;
         printf("ip :%d\n", *ip);
-        asmstruct->code[(*(ip))++] = val;
+        asmstruct->code[(*(ip))] = val;
     }
-    else if (strcmp(cmd, "pop") == 0)
+    else if (strcasecmp(cmd, "pop") == 0)
     {
         command = CMD_POP;
         command |= MASK_REGISTER;
         asmstruct->code[(*(ip))++] = command;
         if (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols, "%s", reg) == 1)
         {
-            if (strcmp(reg, "rax") == 0)
+            
+            #include "comparison_regs.h"
+            /*else*/
             {
-                val = REG_RAX;
+                printf("no such register found\n");
             }
-            else if (strcmp(reg, "rbx") == 0)
-            {
-                val = REG_RBX;
-            }
-            else if (strcmp(reg, "rcx") == 0)
-            {
-                val = REG_RCX;
-            }
-            else if (strcmp(reg, "rdx") == 0)
-            {
-                val = REG_RDX;
-            }
-            else if (strcmp(reg, "rex") == 0)
-            {
-                val = REG_REX;
-            }
-            else if (strcmp(reg, "rfx") == 0)
-            {
-                val = REG_RFX;
-            }
-            else
-            {
-                printf("lolsyntax error\n");
-            }
+            #undef CompRegs
         }
         else
         {
             printf("syntax error");
         }
-        asmstruct->code[(*(ip))++] = val;
+        asmstruct->code[(*(ip))] = val;
 
     }
     return val;

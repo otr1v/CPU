@@ -1,10 +1,13 @@
 ASM 2
-push 1
+push 0
 pop rax
-push -4
+push 0
 pop rbx
-push -18
+push 1
 pop rcx
+push rax
+push 0
+je :5
 push rbx
 push rbx
 mul
@@ -15,8 +18,16 @@ mul
 mul
 sub
 pop rdx
+push rdx
+push 0
 je :3
-jb :4
+push rdx
+push 0
+ja :4
+push 228133
+push 228133
+pop rfx
+pop rex
 hlt
 3:
 push -1
@@ -27,6 +38,8 @@ push rax
 mul
 div
 pop rex
+push 228133
+pop rfx
 hlt
 4:
 push rdx
@@ -51,5 +64,33 @@ push 2
 push rax
 mul
 div
+pop rfx
+hlt
+5:
+push rbx
+push 0
+je :6
+push -1
+push rcx
+mul
+push rbx
+div
+pop rex
+push 228133
+pop rfx
+hlt
+6:
+push rcx
+push 0
+je :7
+push 228133
+push 228133
+pop rex
+pop rfx
+hlt
+7:
+push 111111
+push 111111
+pop rex
 pop rfx
 hlt

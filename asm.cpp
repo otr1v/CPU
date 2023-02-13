@@ -4,8 +4,6 @@
 int main(int argc, char* argv[])
 {
     ASM asmus = {};
-    // int code[MAX_COMMANDS] ={};
-    // int labels[MAX_LABEL_SIZE] = {};
     CreateAsm(&asmus);
     if (argc > 1)
     {
@@ -28,5 +26,3 @@ int main(int argc, char* argv[])
     
     return 0;
 }
-
-//================================================================

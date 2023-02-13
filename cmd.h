@@ -52,10 +52,10 @@ DEF_CMD (IN,   8,  0,
 )
 DEF_CMD (HLT,   9,  0, 
     {
-        
+        return 0;
     }
 )
-DEF_CMD (JMP,  10,  0, 
+DEF_CMD (CALL, 10,  0, 
 )
 DEF_CMD (SQRT, 11,  0, 
     {
@@ -78,12 +78,35 @@ DEF_CMD (CPY,  12,  0,
         stackPush(&cpu->stack, &pop_value);
     }
 )
-DEF_CMD (JB,   13,  0, 
+DEF_JMP(JB, 13, <)
+
+DEF_JMP(JBE, 14, <=)
+
+DEF_JMP(JA, 15, >)
+
+DEF_JMP(JAE, 16, >=)
+
+DEF_JMP(JE, 17, ==)
+
+DEF_JMP(JNE, 18, !=)
+
+
+DEF_CMD (FACT, 20,  0, 
 )
-DEF_CMD (JE,   14,  0, 
+DEF_CMD(PRNT, 21, 0,
+    {
+        printf("0");
+    }
 )
-DEF_CMD (CALL, 15,  0, 
+DEF_CMD(ENDL, 22, 0,
+    {
+        printf("\n");
+    }
 )
-DEF_CMD (FACT, 16,  0, 
+DEF_CMD(SPACE, 22, 0,
+    {
+        printf(" ");
+    }
 )
+
 

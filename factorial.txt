@@ -13,5 +13,7 @@ push rax
 push rbx
 mul
 pop rbx
-jae :2
+push rax
+push 5
+jbe :2
 hlt

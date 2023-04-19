@@ -54,7 +54,7 @@ int* ReadFile(ASM* asmstruct, char* filename)
         return NULL;
     }
     int num_of_commands = n_strings;
-   // printf("num%d", num_of_commands);
+    
     ClearArray(asmstruct->code);
 
     WriteCommands(asmstruct, num_of_commands);
@@ -85,7 +85,7 @@ int* WriteCommands(ASM* asmstruct, int num_of_commands)
 
     asmstruct->current_line = 1;
     int ip = 0;
-    printf("num : %d", num_of_commands);
+    
     while (asmstruct->current_line != (num_of_commands + 1))
     {
 
@@ -97,13 +97,10 @@ int* WriteCommands(ASM* asmstruct, int num_of_commands)
 
         if (sscanf(asmstruct->text[asmstruct->current_line], "%d%c", &label, &ch) == 2)
         {
-            printf("labeeel%d%c\n\n", label, ch);
             if (ch == ':')
             {
                 asmstruct->labels[label] = ip;
             }
-            // printf("what\n");
-            printf("label is %d\n", asmstruct->labels[label]);
         }
 
         sscanf(asmstruct->text[asmstruct->current_line], "%s%n", cmd, &(asmstruct->read_symbols));
@@ -125,16 +122,10 @@ int* WriteCommands(ASM* asmstruct, int num_of_commands)
         #undef DEF_JMP
         #undef DEF_CMD
 
-        if (ip > 1000)
-        {
-            return asmstruct->code;
-        }
+        
         asmstruct->current_line++;
     }
-    for (int i = 0; i < 55; i++)
-    {
-        printf("%d code :%d\n", i, asmstruct->code[i]);
-    }
+    
     fwrite(asmstruct->code, sizeof(int), ip, out);
     fclose(out);
     return asmstruct->code;
@@ -209,16 +200,17 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
         {
             printf("syntax error : there wasn't these type of command\n\n");
         }
-        printf("command :%d\n", command);
+        
         asmstruct->code[(*(ip))++] = command;
-        printf("ip :%d\n", *ip);
         asmstruct->code[(*(ip))] = val;
+        
     }
     else if (strcasecmp(cmd, "pop") == 0)
     {
         command = CMD_POP;
         command |= MASK_REGISTER;
         asmstruct->code[(*(ip))++] = command;
+        
         if (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols, "%s", reg) == 1)
         {
             
@@ -233,6 +225,7 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
         {
             printf("syntax error");
         }
+        
         asmstruct->code[(*(ip))] = val;
 
     }

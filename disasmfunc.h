@@ -73,21 +73,7 @@ void ReadBinary()
         #include "cmd.h"
         #undef DEF_CMD
       
-        // else if((code[counter] & CMD_MASK) == CMD_JE)
-        // {
-        //     fprintf(out, "je :");
-        //     counter++;
-        //     int label = code[counter++];
-        //     fprintf(out, "%d\n", label);
-        // }
-        // else if((code[counter] & CMD_MASK) == CMD_JB)
-        // {
-        //     fprintf(out, "jb :");
-        //     counter++;
-        //     int label = code[counter++];
-        //     fprintf(out, "%d\n", label);
-        // }
-      
+     
         
         else if((code[counter] & CMD_MASK) == CMD_POP)
         {

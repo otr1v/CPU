@@ -23,20 +23,15 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
     int* err = {};
     elem_t pop_value     = POISON;
     elem_t cmd_pop_value = POISON;
+    
     asmcode = fopen("out.bin", "rb");
     CHECK_ERR(asmcode == NULL, "can't open file", ERR_OPEN_FILE);
+    
     int size_buf = FileSize(asmcode);
     cpu->code = (int *) calloc((size_buf / sizeof(int)) + 1, sizeof(int));
     int res = fread(cpu->code, sizeof(int), size_buf, asmcode);
     fclose(asmcode);
-    //printf("%d", res);
-    for (int i = 0; i < (size_buf / sizeof(int)); i++)
-    {
-        printf("%d. %d\n", i, cpu->code[i]);
-        //printf("lolll");
-        //printf("i %d\n", i);
-    }
-    //printf("how");
+    
     int counter = 0, insidecounter = 0;
     int ip = 0;
     int val = 0;
@@ -44,7 +39,6 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
 
     while(ip !=  ((size_buf / sizeof(int)) ))
     {
-        // printf("In stack %d\n", cpu->stack->data[cpu->stack->size - 1]);
        
         switch (cpu->code[ip] & CMD_MASK){
         
@@ -56,11 +50,10 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
         #define DEF_JMP(name, num, symbol)       \
             case num:                                  \
                 first_pop  = stackPop(&cpu->stack, err);\
-                printf("COMPLETE")  ;\
                 second_pop = stackPop(&cpu->stack, err); \
                 if (second_pop symbol first_pop)          \
                 {                                          \
-                    ip++;             printf("her");                      \
+                    ip++;                                   \
                     ip = cpu->code[ip] - 1;                  \ 
                 }                                               \
                 else                                            \
@@ -87,9 +80,8 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
 int GetArgs(int* ip, CPU* cpu)
 {
     int cmd = cpu->code[(*(ip))++];
-    printf("cmd is %d\n", cmd);
     int arg = 0;
-    //printf("lol");
+    
     if (cmd & ARG_IMMED)
     {
         arg = cpu->code[(*(ip))];
@@ -99,11 +91,9 @@ int GetArgs(int* ip, CPU* cpu)
         if (cmd & CMD_PUSH)
         {
             arg = cpu->registers[cpu->code[(*(ip))]];
-            printf("where my arg ");
         }
         else
         {
-            printf("so sad");
             arg = cpu->code[(*(ip))];
         }
     }
@@ -111,7 +101,6 @@ int GetArgs(int* ip, CPU* cpu)
     {
         arg = cpu->ram[arg];
     }
-    printf("arg is %d\n", arg);
     return arg;
 }
 

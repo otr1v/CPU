@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <stdlib.h>
-#include "../stack/func.cpp"
+#include "stack/func.cpp"
 #include <math.h>
 #include "enum.h"
 

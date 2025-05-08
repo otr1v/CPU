@@ -1,6 +1,8 @@
+#pragma once
 #define DEF_CMD(name, num, arg, ...)    \
     CMD_##name = num,
-
+#define DEF_JMP(name, num, arg)    \
+    CMD_##name = num,
 enum 
 {
     #include "cmd.h"
@@ -9,6 +11,7 @@ enum
     BAD_FREAD
 };
 
+#undef DEF_JMP
 #undef DEF_CMD
 
 const int ARG_IMMED           = 1 << 6;

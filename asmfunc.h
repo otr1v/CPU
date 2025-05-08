@@ -1,5 +1,5 @@
 #include "asm.h"
-#include "filesize.cpp"
+#include "filesize.h"
 
 void CreateAsm(ASM* asmstruct)
 {
@@ -187,7 +187,7 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
                         val = REG_##register;               \
                     }                                        \
                 else
-            #include "comparison_regs.h"
+            #include "comparison_of_regs.h"
             /*else*/
             {
                 printf("Syntax Error, no such register added");
@@ -214,7 +214,7 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
         if (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols, "%s", reg) == 1)
         {
             
-            #include "comparison_regs.h"
+            #include "comparison_of_regs.h"
             /*else*/
             {
                 printf("no such register found\n");

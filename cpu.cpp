@@ -1,5 +1,5 @@
 #include "cpu.h"
-#include "funccpu.h"
+#include "cpufunc.h"
 
 
 int main()

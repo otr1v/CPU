@@ -1,6 +1,7 @@
 #include "cpu.h"
-#include "filesize.cpp"
-#define QUADRO_EQ
+#include "filesize.h"
+
+extern int FileSize(FILE* fp);
 
 void CreateCpu(CPU* cpu)
 {
@@ -44,22 +45,22 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
         
         #define DEF_CMD(name, num, arg, code)   \
             case num:                            \
-                code printf("one") ;                            \
+                code printf("one") ;              \
                 ip++;                              \
                 break;
-        #define DEF_JMP(name, num, symbol)       \
+        #define DEF_JMP(name, num, symbol)            \
             case num:                                  \
                 first_pop  = stackPop(&cpu->stack, err);\
                 second_pop = stackPop(&cpu->stack, err); \
                 if (second_pop symbol first_pop)          \
                 {                                          \
                     ip++;                                   \
-                    ip = cpu->code[ip] - 1;                  \ 
-                }                                               \
-                else                                            \
-                {                                               \   
-                    ip+=2;                                         \
-                }                                         \
+                    ip = cpu->code[ip] - 1;                  \
+                }                                             \
+                else                                           \
+                {                                               \
+                    ip+=2;                                       \
+                }                                                 \
                 break; 
 
         #include "cmd.h"              

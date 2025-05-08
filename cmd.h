@@ -103,7 +103,7 @@ DEF_CMD(ENDL, 22, 0,
         printf("\n");
     }
 )
-DEF_CMD(SPACE, 22, 0,
+DEF_CMD(SPACE, 23, 0,
     {
         printf(" ");
     }

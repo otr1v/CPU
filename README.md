@@ -1,5 +1,5 @@
 # CPU — My First Big Project
-
+.
 ## Description
 This program simulates a basic CPU that reads and executes a custom assembly-like language. It works via a stack-based model.
 

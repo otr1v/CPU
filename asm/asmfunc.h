@@ -153,7 +153,7 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
     
     if (strcasecmp("push", cmd) == 0)
     {
-        char ch1 = ' ', ch2 =' ';
+        char ch1 = ' ';
         char* ptr = asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols + 1;
 
         command = CMD_PUSH;

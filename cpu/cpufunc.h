@@ -31,14 +31,15 @@ int ReadAsm(FILE * asmcode, CPU* cpu)
     int size_buf = FileSize(asmcode);
     cpu->code = (int *) calloc((size_buf / sizeof(int)) + 1, sizeof(int));
     int res = fread(cpu->code, sizeof(int), size_buf, asmcode);
+    CHECK_ERR(res != size_buf, "can't read file", BAD_FREAD);
     fclose(asmcode);
     
-    int counter = 0, insidecounter = 0;
+    
     int ip = 0;
     int val = 0;
     int first_pop = 0, second_pop = 0, sub_result = 0, div_result = 0, sqrt_result = 0;
 
-    while(ip !=  ((size_buf / sizeof(int)) ))
+    while(ip !=  ( (int) (size_buf / sizeof(int)) ))
     {
        
         switch (cpu->code[ip] & CMD_MASK){

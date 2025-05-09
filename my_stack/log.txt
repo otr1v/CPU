@@ -1,0 +1,12 @@
+capacity = 8
+size = 5
+stack has been called from: line : 34, function : int main(), file : main.cpp, name : (null), 
+all is ok
+data[0] = 5
+data[1] = 8
+data[2] = 7
+data[3] = 7
+data[4] = 7
+data[5] = -2281337
+data[6] = -2281337
+data[7] = -2281337

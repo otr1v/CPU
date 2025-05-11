@@ -1,5 +1,5 @@
 # CPU — My First Big Project
-.
+
 ## Description
 This program simulates a basic CPU that reads and executes a custom assembly-like language. It works via a stack-based model.
 
@@ -9,6 +9,16 @@ The program can:
 - Solve quadratic equations (integer roots only)
 
 ---
+
+## How to build:
+```
+make asm
+./asm.out <filename>
+make my_cpu
+./cpu.out out.bin
+```
+
+
 
 ###  Configuration
 - `MAX_LABEL_SIZE = 300` — max label length

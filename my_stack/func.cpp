@@ -19,7 +19,7 @@ stack_type* stackCreator_(stack_type* stack, int number_of_elems)
         stack->data = stack->data + sizeof(CANARY_TYPE) / sizeof(elem_t);
         *(CANARY_TYPE *)(stack->data + number_of_elems)       = RIGHT_DATA_CANARY;
         stack->capacity = number_of_elems;
-        for (int i = 0; i < (stack->capacity); i++)
+        for (size_t i = 0; i < (stack->capacity); i++)
         { 
             stack->data[i] = POISON;
         }
@@ -78,7 +78,7 @@ const int* stackResize(stack_type* stack)
     stack->data = stack->data + sizeof(CANARY_TYPE) / sizeof(elem_t);
     *(CANARY_TYPE *)(stack->data + stack->capacity) = RIGHT_DATA_CANARY;
 
-    for (int i = (stack->size); i < (stack->capacity); i++)
+    for (size_t i = (stack->size); i < (stack->capacity); i++)
     {
         memcpy(stack->data + i, &POISON, sizeof(elem_t));
     }
@@ -128,7 +128,7 @@ int stackDestroyer(stack_type* stack)
 uint32_t hash(stack_type* stack)
 {
     uint32_t hash = 5381;
-    int i = 0;
+    size_t i = 0;
     for (elem_t value = stack->data[i]; i != stack->capacity; i++)
     {
         hash = hash * 33 + value;
@@ -201,9 +201,9 @@ int stackDump(stack_type* stack, int* err, const char* name, const int line, con
    
     else
     {
-        for (int i = 0; i < (stack->capacity); i++)
+        for (size_t i = 0; i < (stack->capacity); i++)
         {
-            fprintf(fp, "data[%d] = %d\n", i, stack->data[i]);
+            fprintf(fp, "data[%ld] = %d\n", i, stack->data[i]);
         }
         fprintf(fp, "%d\n", stack->error);
         if (((stack->error) & STACK_NULL) == STACK_NULL)
@@ -240,9 +240,9 @@ int stackDump(stack_type* stack, int* err, const char* name, const int line, con
             fprintf(fp, "your stack has been hacked(right data canary has been damaged)\n");
         } 
     }
-      for (int i = 0; i < (stack->capacity); i++)
+      for (size_t i = 0; i < (stack->capacity); i++)
         {
-            fprintf(fp, "data[%d] = %d\n", i, stack->data[i]);
+            fprintf(fp, "data[%ld] = %d\n", i, stack->data[i]);
         }
     fclose(fp);
     stack->error = stackError(stack);

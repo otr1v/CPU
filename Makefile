@@ -6,8 +6,8 @@ asm:
 my_cpu:
 	g++ cpu/cpu.cpp commands/filesize.cpp $(CFLAGS) -o cpu.out
 debug_asm:
-	g++ asm/asm.cpp commands/filesize.cpp -g $(CFLAGS) -o  asm_debug.out
+	g++ asm/asm.cpp commands/filesize.cpp -g $(CFLAGS) -DDEBUG -o  asm_debug.out
 debug_cpu:
 	g++ cpu/cpu.cpp commands/filesize.cpp -g $(CFLAGS) -o cpu_debug.out
-disasm:
-	g++ disasm/disasm.cpp commands/filesize.cpp $(CFLAGS) -o disasm.out
+dis_asm:
+	g++ disasm/disasm.cpp commands/filesize.cpp $(CFLAGS) -o disasm.out 

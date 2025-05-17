@@ -1,5 +1,5 @@
 #include "disasm.h"
-#include "filesize.cpp"
+#include "filesize.h"
 
 void ReadBinary()
 {
@@ -13,7 +13,7 @@ void ReadBinary()
 
     fprintf(out, "ASM 2\n");
     
-    int counter = 0;
+    size_t counter = 0;
     
     while (counter != (size_buf / sizeof(int)))
     {
@@ -43,7 +43,7 @@ void ReadBinary()
                         }                                        \
                     else
                 
-                #include "comparison_regs.h"
+                #include "comparison_of_regs.h"
                 /*else*/
                 {
                     printf("syntax error");
@@ -58,31 +58,14 @@ void ReadBinary()
                 counter++;
             }
         }
-        #define DEF_CMD(name, num, arg, ...)                 \
-                else if ((code[counter] & CMD_MASK) == num)      \
-                {                                              \
-                    if (arg == 0)      \
-                    {                                            \
-                        fprintf(out, #name"\n");                  \
-                    }                                               \
-                    counter++;                                        \
-                }                                                    \
-                                                                      \
-                
-
-        #include "cmd.h"
-        #undef DEF_CMD
-      
-     
-        
-        else if((code[counter] & CMD_MASK) == CMD_POP)
+        else if ((code[counter] & CMD_MASK) == CMD_POP)
         {
             fprintf(out, "pop ");
             if ((code[counter] &  ARG_REG) == ARG_REG)
             {
                 counter++;
 
-                #include "comparison_regs.h"
+                #include "comparison_of_regs.h"
                
                 /*else*/
                 {
@@ -93,15 +76,33 @@ void ReadBinary()
             else
             {
                 counter++;
-                // printf("");
             }
-        }
+        } 
+        #define DEF_CMD(name, num, arg, ...)                 \
+                else if ((code[counter] & CMD_MASK) == num)      \
+                {                                              \
+                    if (arg == 0)      \
+                    {                                            \
+                        fprintf(out, #name"\n");                  \
+                        if ((code[counter] & CMD_MASK) >= CMD_JB && \
+                            (code[counter] & CMD_MASK) <= CMD_JNE) \
+                        {                                      \
+                            fprintf(out, " %d\n", code[++counter]); \
+                        }                                        \
+                    }                                               \
+                    counter++;                                        \
+                }                                                    
+        #define DEF_JMP(name, num, ...)       \
+                DEF_CMD(name, num, 1, ...)                                                              
+
+        #include "cmd.h"
+        #undef DEF_CMD     
         else
         {
             counter++;
             printf("\n");
             printf("no such command has found");
-            printf("%d\n", counter);
+            printf("%ld\n", counter);
         }
         #undef CompRegs
     }

@@ -121,7 +121,19 @@ int* WriteCommands(ASM* asmstruct, int num_of_commands)
         
         #undef DEF_JMP
         #undef DEF_CMD
-
+        /* else */
+        {
+            #ifdef DEBUG
+                printf("command = %s\n", cmd);
+                printf("asmstruct->current_line = %d\n", asmstruct->current_line);
+                printf("asmstruct->read_symbols = %d\n", asmstruct->read_symbols);
+            #endif
+        }
+        #ifdef DEBUG
+            printf("ip = %d\n", ip);
+            printf("asmstruct->current_line = %d\n", asmstruct->current_line);
+            printf("asmstruct->read_symbols = %d\n", asmstruct->read_symbols);
+        #endif
         
         asmstruct->current_line++;
     }
@@ -150,7 +162,11 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
     char reg[6] = {};
 
     int counter = 0; // check if command is ram/reg or immed
-    
+    #ifdef DEBUG
+        printf("command = %s\n", cmd);
+        printf("read_symbols = %d\n", asmstruct->read_symbols);
+        printf("current_line = %d\n", asmstruct->current_line);
+    #endif
     if (strcasecmp("push", cmd) == 0)
     {
         char ch1 = ' ';
@@ -159,6 +175,9 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
         command = CMD_PUSH;
         if (sscanf(asmstruct->text[asmstruct->current_line] + asmstruct->read_symbols, "%d", &val) == 1)
         {
+            #ifdef DEBUG
+                printf("val = %d\n", val);
+            #endif
             command |= MASK_IMMED;
             counter++;
         }
@@ -182,7 +201,7 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
             command |= MASK_REGISTER;
             
             #define CompRegs(register)                   \
-                if (strcasecmp(reg, #register) == 0)       \
+                if (strcasecmp(reg, #register) == 0)      \
                     {                                      \
                         val = REG_##register;               \
                     }                                        \
@@ -232,7 +251,7 @@ int ReadArgs(ASM* asmstruct, char cmd[], int* ip)
     else
     {
         (*(ip))++;
-
+        // TODO incorrect command in factorial (SQRT??) should be jbe 
         int label = 0;
         char ch = ' ';
         int spaces = 0;

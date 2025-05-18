@@ -16,6 +16,8 @@ make asm
 ./asm.out <filename>
 make my_cpu
 ./cpu.out out.bin
+make dis_asm
+./disasm 
 ```
 
 
